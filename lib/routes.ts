@@ -1,0 +1,19 @@
+export const PATIENT_LOGIN_PATH  = '/login';
+export const PATIENT_SIGNUP_PATH = '/login?tab=signup';
+export const PATIENT_DASHBOARD   = '/dashboard';
+export const PATIENT_HOSPITAL    = '/dashboard/hospital';
+export const PATIENT_PRESCRIPTIONS = '/dashboard/prescriptions';
+export const PATIENT_PRESCRIPTIONS_DOCTOR = '/dashboard/prescriptions/doctor';
+export const PATIENT_PRESCRIPTIONS_UPLOADED = '/dashboard/prescriptions/uploaded';
+export const PATIENT_PROFILE = '/dashboard/profile';
+export const PATIENT_APPOINTMENTS = '/dashboard/appointments';
+export const PATIENT_REMINDERS = '/dashboard/reminders';
+export const PATIENT_NOTIFICATIONS = '/dashboard/notifications';
+export const PATIENT_RECEIPTS = '/dashboard/receipts';
+export const PATIENT_REPORTS = '/dashboard/reports';
+export const PATIENT_PLANS = '/dashboard/plans';
+export const PATIENT_PAYMENT_HISTORY = '/dashboard/payment-history';
+export const PATIENT_ADMISSIONS = '/dashboard/admissions';
+export const PATIENT_DOCUMENTS = '/dashboard/documents';
+export const PATIENT_HELP_CENTER = '/dashboard/help-center';
+

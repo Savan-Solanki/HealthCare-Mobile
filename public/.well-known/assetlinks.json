@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.medikwik.healthbuddy.patient",
+      "sha256_cert_fingerprints": [
+        "00:30:3E:C1:F4:FA:95:6F:C9:36:53:CF:D6:E1:B1:AF:5A:AE:49:2E:87:83:82:26:2E:34:10:BE:2C:F4:E4:1A",
+        "41:C0:EE:85:B8:C3:45:9E:63:15:19:0E:63:90:8F:C7:E6:2F:7F:29:64:F3:EB:EA:59:34:0E:9F:64:E0:87:B7"
+      ]
+    }
+  }
+]
