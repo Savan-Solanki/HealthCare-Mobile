@@ -1,4 +1,4 @@
-const PRODUCTION_API_ORIGIN = 'https://api.medikwikhealthbuddy.in';
+const PRODUCTION_API_ORIGIN = 'http://13.201.29.22:5001';
 const API_VERSION_PATH = '/api/v1';
 
 const normalizeApiOrigin = (value?: string) => {

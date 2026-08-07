@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 
-const productionApiOrigin = 'https://api.medikwikhealthbuddy.in';
+const productionApiOrigin = 'http://13.201.29.22:5001';
 
 const normalizeApiOrigin = (value?: string) => {
   const configured = value?.trim();
