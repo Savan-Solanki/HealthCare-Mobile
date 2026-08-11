@@ -1,10 +1,10 @@
-const PRODUCTION_API_ORIGIN = 'http://13.201.29.22:5001';
+const PRODUCTION_API_ORIGIN = 'http://13.205.6.9:5001';
 const API_VERSION_PATH = '/api/v1';
 
 export const getApiOrigin = (): string => {
   let configured = process.env.NEXT_PUBLIC_API_URL?.trim();
 
-  // On production HTTPS web pages, direct browser calls to HTTP endpoints (e.g. http://13.201.29.22:5001)
+  // On production HTTPS web pages, direct browser calls to HTTP endpoints (e.g. http://13.205.6.9:5001)
   // are blocked or fail due to mixed content/upgrade-insecure-requests. Use relative path "" so API calls
   // route cleanly through Next.js server rewrites (/api/v1).
   if (typeof window !== 'undefined' && window.location?.protocol === 'https:') {

@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 
-const productionApiOrigin = 'http://13.201.29.22:5001';
+const productionApiOrigin = 'http://13.205.6.9:5001';
 
 const normalizeApiOrigin = (value?: string) => {
   const configured = value?.trim();
