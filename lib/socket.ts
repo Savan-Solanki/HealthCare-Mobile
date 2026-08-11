@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { getPatientDB } from './db';
 import { syncAllPatientData } from './db/sync-engine';
-import { API_ORIGIN } from './api-url';
+import { getApiOrigin } from './api-url';
 
 class PatientSocketManager {
   private socket: Socket | null = null;
@@ -18,9 +18,10 @@ class PatientSocketManager {
 
     this.currentAccountId = accountId;
 
-    console.log(`[Socket] Connecting to ${API_ORIGIN}/patient for account: ${accountId}`);
+    const origin = getApiOrigin();
+    console.log(`[Socket] Connecting to ${origin}/patient for account: ${accountId}`);
 
-    this.socket = io(`${API_ORIGIN}/patient`, {
+    this.socket = io(`${origin}/patient`, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -30,7 +31,7 @@ class PatientSocketManager {
 
     // Lifecycle logging
     this.socket.on('connect', () => {
-      console.log(`[Socket] Successfully connected to socket namespace /patient at ${API_ORIGIN}`);
+      console.log(`[Socket] Successfully connected to socket namespace /patient at ${origin}`);
     });
 
     this.socket.on('connect_error', (error) => {

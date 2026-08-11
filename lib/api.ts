@@ -3,7 +3,7 @@ import axios, {
   AxiosHeaders,
   InternalAxiosRequestConfig,
 } from 'axios';
-import { API_BASE_URL } from '@/lib/api-url';
+import { API_BASE_URL, getApiBaseUrl } from '@/lib/api-url';
 
 import { getDeviceDetails } from '@/lib/device';
 
@@ -66,11 +66,12 @@ const refreshPatientAccessToken = async (): Promise<string | null> => {
 
   try {
     const device = getDeviceDetails();
+    const baseUrl = getApiBaseUrl();
     const response = await axios.post<{
       accessToken?: string;
       user?: unknown;
     }>(
-      `${API_BASE_URL}/patient/auth/refresh`,
+      `${baseUrl}/patient/auth/refresh`,
       {},
       {
         withCredentials: true,
@@ -100,6 +101,7 @@ const refreshPatientAccessToken = async (): Promise<string | null> => {
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
+    config.baseURL = getApiBaseUrl();
     const token = localStorage.getItem('patient_access_token');
     if (token) setAuthorizationHeader(config, token);
 
@@ -153,8 +155,9 @@ export const logoutPatient = async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('patient_deliberate_logout', '1');
     }
+    const baseUrl = getApiBaseUrl();
     await axios.post(
-      `${API_BASE_URL}/patient/auth/logout`,
+      `${baseUrl}/patient/auth/logout`,
       {},
       {
         withCredentials: true,
