@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: self + Next.js inline + Firebase + Google APIs + Razorpay (checkout + CDN)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://accounts.google.com https://challenges.cloudflare.com https://checkout.razorpay.com https://cdn.razorpay.com https://api.razorpay.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.google.com https://play.google.com https://challenges.cloudflare.com https://checkout.razorpay.com https://cdn.razorpay.com https://api.razorpay.com",
               // Styles: self + inline styles (needed for Tailwind)
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
               // Fonts
@@ -78,13 +78,13 @@ const nextConfig: NextConfig = {
               // Images: self + data URIs + Firebase storage + S3 + Razorpay
               "img-src 'self' data: blob: https://*.firebaseapp.com https://*.googleapis.com https://*.googleusercontent.com https://medkwik-healthbuddy-storage.s3.eu-north-1.amazonaws.com https://*.amazonaws.com https://cdn.razorpay.com https://checkout.razorpay.com",
               // Connect: self + API + Firebase + FCM + Razorpay (API + CDN + analytics)
-              `connect-src 'self' ${apiOrigin} ${wsOrigin} ws://localhost:3000 ws://127.0.0.1:3000 wss://api.medikwikhealthbuddy.in ${s3UploadConnectOrigins} https://*.googleapis.com https://fcm.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://challenges.cloudflare.com https://accounts.google.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.razorpay.com https://cdn.razorpay.com https://lumberjack.razorpay.com https://checkout.razorpay.com`,
+              `connect-src 'self' ${apiOrigin} ${wsOrigin} ws://localhost:3000 ws://127.0.0.1:3000 wss://api.medikwikhealthbuddy.in ${s3UploadConnectOrigins} https://*.googleapis.com https://fcm.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://challenges.cloudflare.com https://accounts.google.com https://play.google.com https://*.google.com https://fonts.googleapis.com https://fonts.gstatic.com https://api.razorpay.com https://cdn.razorpay.com https://lumberjack.razorpay.com https://checkout.razorpay.com`,
               // Workers: self (for service worker)
               "worker-src 'self' blob:",
               // Manifest
               "manifest-src 'self'",
               // Frames: only Google OAuth + Cloudflare Turnstile + Razorpay Iframe Overlay
-              "frame-src https://accounts.google.com https://challenges.cloudflare.com https://api.razorpay.com https://checkout.razorpay.com",
+              "frame-src https://accounts.google.com https://play.google.com https://*.google.com https://challenges.cloudflare.com https://api.razorpay.com https://checkout.razorpay.com",
               // Form actions
               "form-action 'self'",
               // Upgrade insecure requests in production
