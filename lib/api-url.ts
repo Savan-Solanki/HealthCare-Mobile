@@ -8,12 +8,11 @@ const normalizeApiOrigin = (value?: string) => {
     return PRODUCTION_API_ORIGIN;
   }
 
-  // If running in browser and URL refers to localhost/127.0.0.1, but browser accesses via local IP,
-  // dynamically replace localhost/127.0.0.1 with the page's current hostname so that the device
-  // can connect to the dev server.
+  // Only rewrite localhost/127.0.0.1 if accessing via a local network IP or .local domain
   if (typeof window !== 'undefined' && window.location) {
     const { hostname } = window.location;
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    const isLocalNetworkHost = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.endsWith('.local');
+    if (isLocalNetworkHost && hostname !== 'localhost' && hostname !== '127.0.0.1') {
       configured = configured.replace('localhost', hostname).replace('127.0.0.1', hostname);
     }
   }
