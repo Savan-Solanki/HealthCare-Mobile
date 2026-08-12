@@ -112,6 +112,11 @@ api.interceptors.request.use((config) => {
     config.headers.set('x-device-type', device.deviceType);
     config.headers.set('x-browser-version', device.browserVersion);
 
+    // For FormData uploads (file uploads), remove the default JSON Content-Type
+    // so axios can auto-generate the correct multipart/form-data boundary header.
+    if (config.data instanceof FormData) {
+      config.headers.delete('Content-Type');
+    }
   }
 
   return config;
