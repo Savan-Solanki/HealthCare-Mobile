@@ -29,6 +29,16 @@ export const getApiOrigin = (): string => {
   return configured.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 };
 
+export const getSocketOrigin = (): string => {
+  let configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  if (!configured || configured.startsWith('/')) {
+    return PRODUCTION_API_ORIGIN;
+  }
+
+  return configured.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+};
+
 export const getApiBaseUrl = (): string => `${getApiOrigin()}${API_VERSION_PATH}`;
 
 export const API_ORIGIN = getApiOrigin();
