@@ -19,13 +19,22 @@ class PatientSocketManager {
     this.currentAccountId = accountId;
 
     const socketOrigin = getSocketOrigin();
+
+    // Browsers on HTTPS pages (e.g. Vercel) block unencrypted WebSocket connections to http:// IP hosts due to TLS policies.
+    // Prevent TLS error console spam by skipping socket initialization when accessing an HTTP backend from HTTPS.
+    if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && socketOrigin.startsWith('http://')) {
+      console.log('[Socket] Realtime WebSockets disabled on HTTPS browser for unencrypted HTTP backend origin.');
+      return;
+    }
+
     console.log(`[Socket] Connecting to ${socketOrigin}/patient for account: ${accountId}`);
 
     this.socket = io(`${socketOrigin}/patient`, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionDelay: 1000,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
     });
 

@@ -691,23 +691,41 @@ export default function PatientPrescriptionsScreen({ view = 'hub' }: { view?: Pr
         throw new Error('Upload session could not be started.');
       }
 
-      const s3Response = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': signedContentType,
-        },
-      });
-
-      if (!s3Response.ok) {
-        throw new Error('Failed to upload prescription photo to storage.');
+      let s3Success = false;
+      try {
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': signedContentType,
+          },
+        });
+        if (s3Response.ok) {
+          s3Success = true;
+        }
+      } catch (s3Err) {
+        console.warn('[Prescriptions] Direct S3 upload failed or blocked by CORS. Using server upload fallback...', s3Err);
       }
 
-      await api.post(
-        '/patient/prescriptions/upload-complete',
-        { uploadToken },
-        { timeout: 120000 }
-      );
+      if (s3Success) {
+        await api.post(
+          '/patient/prescriptions/upload-complete',
+          { uploadToken },
+          { timeout: 120000 }
+        );
+      } else {
+        // Fallback: Send file directly to backend API endpoint to bypass browser S3 CORS block
+        const formData = new FormData();
+        formData.append('prescription', file);
+        Object.entries(uploadForm).forEach(([key, value]) => {
+          if (value.trim()) formData.append(key, value.trim());
+        });
+
+        await api.post('/patient/prescriptions/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000,
+        });
+      }
       toast.success('Prescription uploaded successfully.');
       setDashboard((prev) => {
         if (!prev) return null;
