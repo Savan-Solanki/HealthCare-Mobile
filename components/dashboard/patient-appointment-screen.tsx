@@ -215,7 +215,7 @@ function DesktopSidebar({
             <HeartPulse className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[1.9rem] font-bold leading-none text-slate-950">healthcare</p>
+            <p className="text-[1.9rem] font-bold leading-none text-slate-950">Healthcare</p>
             <p className="mt-1 text-sm text-slate-500">Patient app</p>
           </div>
         </div>

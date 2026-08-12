@@ -233,11 +233,11 @@ export default function PatientPaymentHistoryScreen() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-700 to-sky-700 text-white">
                     <HeartPulse className="h-4.5 w-4.5" />
                   </div>
-                  <span className="text-base font-extrabold tracking-tight text-slate-950">healthcare</span>
+                  <span className="text-base font-extrabold tracking-tight text-slate-950">Healthcare</span>
                 </div>
                 <p className="mt-1 text-[10px] text-slate-500 font-medium leading-normal">
-                  healthcare Pvt Ltd<br />
-                  info@medikwikhealthbuddy.in
+                  Healthcare Pvt Ltd<br />
+                  
                 </p>
               </div>
               <div className="text-right">
@@ -310,7 +310,7 @@ export default function PatientPaymentHistoryScreen() {
 
             {/* Invoice Footer note */}
             <p className="mt-4 text-center text-[10px] text-slate-400 font-medium">
-              Thank you for trusting healthcare. This is a computer-generated tax receipt.
+              Thank you for trusting Healthcare. This is a computer-generated tax receipt.
             </p>
           </div>
         </div>

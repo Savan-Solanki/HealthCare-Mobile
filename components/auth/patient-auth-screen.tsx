@@ -783,7 +783,7 @@ export default function PatientAuthScreen() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-16">
             <img src="/logo.jpg" alt="healthcare Logo" className="w-10 h-10 rounded-xl object-cover bg-white/20 backdrop-blur-sm" />
-            <span className="text-white font-bold text-lg tracking-tight">healthcare Patient</span>
+            <span className="text-white font-bold text-lg tracking-tight">Healthcare Patient</span>
           </div>
 
           {/* Headline */}
@@ -815,7 +815,7 @@ export default function PatientAuthScreen() {
         {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2.5 mb-8">
           <img src="/logo.jpg" alt="healthcare Logo" className="w-9 h-9 rounded-xl object-cover" />
-          <span className="font-bold text-gray-800">healthcare Patient</span>
+          <span className="font-bold text-gray-800">Healthcare Patient</span>
         </div>
 
         {/* Card */}
