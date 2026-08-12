@@ -39,28 +39,51 @@ export const uploadPatientAvatar = async (croppedDataUrl: string): Promise<strin
     throw new Error('Unable to start profile photo upload.');
   }
 
-  const uploadResponse = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': sessionContentType,
-    },
-    body: blob,
-  });
-
-  if (!uploadResponse.ok) {
-    throw new Error('Profile photo upload failed. Please try again.');
+  // Try direct S3 upload first; fallback to server-side if CORS blocks it
+  let s3Success = false;
+  try {
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': sessionContentType,
+      },
+      body: blob,
+    });
+    if (uploadResponse.ok) {
+      s3Success = true;
+    }
+  } catch (s3Err) {
+    console.warn('[Avatar] Direct S3 upload blocked by CORS. Using server fallback...', s3Err);
   }
 
-  const completeResponse = await api.post('/patient/avatar/upload-complete', {
-    uploadToken,
+  if (s3Success) {
+    const completeResponse = await api.post('/patient/avatar/upload-complete', {
+      uploadToken,
+    });
+
+    const avatarUrl = completeResponse.data?.data?.avatar;
+    if (!avatarUrl) {
+      throw new Error('Profile photo upload could not be finalized.');
+    }
+
+    return avatarUrl;
+  }
+
+  // Fallback: upload avatar directly through backend API as multipart form data
+  const formData = new FormData();
+  formData.append('avatar', blob, 'avatar.jpg');
+
+  const fallbackResponse = await api.put('/patient/profile', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
   });
 
-  const avatarUrl = completeResponse.data?.data?.avatar;
-  if (!avatarUrl) {
+  const fallbackAvatar = fallbackResponse.data?.data?.avatar || fallbackResponse.data?.data?.avatarUrl;
+  if (!fallbackAvatar) {
     throw new Error('Profile photo upload could not be finalized.');
   }
 
-  return avatarUrl;
+  return fallbackAvatar;
 };
 
 export const cropAndUploadPatientAvatar = async (

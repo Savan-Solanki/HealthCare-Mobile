@@ -264,21 +264,37 @@ export default function PatientReportsScreen() {
 
       const { uploadUrl, uploadToken, contentType: signedContentType } = sessionResponse.data.data;
 
-      // 2. Put file to S3
-      const s3Response = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': signedContentType,
-        },
-      });
-
-      if (!s3Response.ok) {
-        throw new Error('S3 upload rejected by storage provider.');
+      // 2. Put file to S3 (with fallback to server upload if CORS blocks it)
+      let s3Success = false;
+      try {
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': signedContentType,
+          },
+        });
+        if (s3Response.ok) {
+          s3Success = true;
+        }
+      } catch (s3Err) {
+        console.warn('[Reports] Direct S3 upload blocked by CORS. Using server fallback...', s3Err);
       }
 
-      // 3. Complete session
-      await api.post('/patient/reports/upload-complete', { uploadToken });
+      if (s3Success) {
+        // 3. Complete session
+        await api.post('/patient/reports/upload-complete', { uploadToken });
+      } else {
+        // Fallback: upload file directly through backend API
+        const formData = new FormData();
+        formData.append('report', file);
+        formData.append('fileName', file.name);
+
+        await api.post('/patient/reports/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000,
+        });
+      }
 
       toast.success('Medical report uploaded successfully!');
       void initData();
