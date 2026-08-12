@@ -722,7 +722,6 @@ export default function PatientPrescriptionsScreen({ view = 'hub' }: { view?: Pr
         });
 
         await api.post('/patient/prescriptions/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
           timeout: 120000,
         });
       }

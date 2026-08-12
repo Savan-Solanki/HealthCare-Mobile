@@ -74,7 +74,6 @@ export const uploadPatientAvatar = async (croppedDataUrl: string): Promise<strin
   formData.append('avatar', blob, 'avatar.jpg');
 
   const fallbackResponse = await api.put('/patient/profile', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
     timeout: 60000,
   });
 

@@ -291,7 +291,6 @@ export default function PatientReportsScreen() {
         formData.append('fileName', file.name);
 
         await api.post('/patient/reports/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
           timeout: 120000,
         });
       }
