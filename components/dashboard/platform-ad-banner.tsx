@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { proxyImageUrl } from '@/lib/proxy-image';
 import { X } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -71,7 +72,7 @@ export default function PlatformAdBanner() {
           aria-label={ad.title || 'Open advertisement'}
         >
           <img
-            src={ad.posterUrl}
+            src={proxyImageUrl(ad.posterUrl) ?? ad.posterUrl}
             alt={ad.title || 'Advertisement'}
             className="max-h-[70vh] w-full object-cover"
           />

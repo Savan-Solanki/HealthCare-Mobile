@@ -668,53 +668,11 @@ export default function PatientPrescriptionsScreen({ view = 'hub' }: { view?: Pr
     try {
       setUploading(true);
 
-      const sessionPayload: Record<string, string | number> = {
-        contentType: file.type,
-        fileSize: file.size,
-        fileName: file.name,
-      };
-      Object.entries(uploadForm).forEach(([key, value]) => {
-        if (value.trim()) sessionPayload[key] = value.trim();
-      });
+      // On HTTPS (Vercel production), S3 presigned URLs fail due to CORS/mixed-content.
+      // Upload directly through the backend API instead.
+      const isHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 
-      const sessionResponse = await api.post<{
-        data?: { uploadUrl?: string; uploadToken?: string; contentType?: string };
-      }>('/patient/prescriptions/upload-session', sessionPayload, {
-        timeout: 60000,
-      });
-
-      const uploadUrl = sessionResponse.data?.data?.uploadUrl;
-      const uploadToken = sessionResponse.data?.data?.uploadToken;
-      const signedContentType = sessionResponse.data?.data?.contentType || file.type;
-
-      if (!uploadUrl || !uploadToken) {
-        throw new Error('Upload session could not be started.');
-      }
-
-      let s3Success = false;
-      try {
-        const s3Response = await fetch(uploadUrl, {
-          method: 'PUT',
-          body: file,
-          headers: {
-            'Content-Type': signedContentType,
-          },
-        });
-        if (s3Response.ok) {
-          s3Success = true;
-        }
-      } catch (s3Err) {
-        console.warn('[Prescriptions] Direct S3 upload failed or blocked by CORS. Using server upload fallback...', s3Err);
-      }
-
-      if (s3Success) {
-        await api.post(
-          '/patient/prescriptions/upload-complete',
-          { uploadToken },
-          { timeout: 120000 }
-        );
-      } else {
-        // Fallback: Send file directly to backend API endpoint to bypass browser S3 CORS block
+      if (isHttps) {
         const formData = new FormData();
         formData.append('prescription', file);
         Object.entries(uploadForm).forEach(([key, value]) => {
@@ -724,6 +682,42 @@ export default function PatientPrescriptionsScreen({ view = 'hub' }: { view?: Pr
         await api.post('/patient/prescriptions/upload', formData, {
           timeout: 120000,
         });
+      } else {
+        // Local/HTTP: use presigned S3 URL flow
+        const sessionPayload: Record<string, string | number> = {
+          contentType: file.type,
+          fileSize: file.size,
+          fileName: file.name,
+        };
+        Object.entries(uploadForm).forEach(([key, value]) => {
+          if (value.trim()) sessionPayload[key] = value.trim();
+        });
+
+        const sessionResponse = await api.post<{
+          data?: { uploadUrl?: string; uploadToken?: string; contentType?: string };
+        }>('/patient/prescriptions/upload-session', sessionPayload, {
+          timeout: 60000,
+        });
+
+        const uploadUrl = sessionResponse.data?.data?.uploadUrl;
+        const uploadToken = sessionResponse.data?.data?.uploadToken;
+        const signedContentType = sessionResponse.data?.data?.contentType || file.type;
+
+        if (!uploadUrl || !uploadToken) {
+          throw new Error('Upload session could not be started.');
+        }
+
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': signedContentType },
+        });
+
+        if (!s3Response.ok) {
+          throw new Error('Failed to upload prescription photo to storage.');
+        }
+
+        await api.post('/patient/prescriptions/upload-complete', { uploadToken }, { timeout: 120000 });
       }
       toast.success('Prescription uploaded successfully.');
       setDashboard((prev) => {

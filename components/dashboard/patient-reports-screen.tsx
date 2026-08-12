@@ -253,39 +253,10 @@ export default function PatientReportsScreen() {
       setUploading(true);
       setIsUploadOpen(false);
 
-      // 1. Create upload session
-      const sessionResponse = await api.post<{
-        data: { uploadUrl: string; uploadToken: string; contentType: string };
-      }>('/patient/reports/upload-session', {
-        contentType: file.type,
-        fileSize: file.size,
-        fileName: file.name,
-      });
+      const isHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
 
-      const { uploadUrl, uploadToken, contentType: signedContentType } = sessionResponse.data.data;
-
-      // 2. Put file to S3 (with fallback to server upload if CORS blocks it)
-      let s3Success = false;
-      try {
-        const s3Response = await fetch(uploadUrl, {
-          method: 'PUT',
-          body: file,
-          headers: {
-            'Content-Type': signedContentType,
-          },
-        });
-        if (s3Response.ok) {
-          s3Success = true;
-        }
-      } catch (s3Err) {
-        console.warn('[Reports] Direct S3 upload blocked by CORS. Using server fallback...', s3Err);
-      }
-
-      if (s3Success) {
-        // 3. Complete session
-        await api.post('/patient/reports/upload-complete', { uploadToken });
-      } else {
-        // Fallback: upload file directly through backend API
+      if (isHttps) {
+        // On HTTPS (Vercel), upload directly through backend to avoid S3 CORS issues
         const formData = new FormData();
         formData.append('report', file);
         formData.append('fileName', file.name);
@@ -293,6 +264,29 @@ export default function PatientReportsScreen() {
         await api.post('/patient/reports/upload', formData, {
           timeout: 120000,
         });
+      } else {
+        // Local/HTTP: use presigned S3 URL flow
+        const sessionResponse = await api.post<{
+          data: { uploadUrl: string; uploadToken: string; contentType: string };
+        }>('/patient/reports/upload-session', {
+          contentType: file.type,
+          fileSize: file.size,
+          fileName: file.name,
+        });
+
+        const { uploadUrl, uploadToken, contentType: signedContentType } = sessionResponse.data.data;
+
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': signedContentType },
+        });
+
+        if (!s3Response.ok) {
+          throw new Error('Report upload failed.');
+        }
+
+        await api.post('/patient/reports/upload-complete', { uploadToken });
       }
 
       toast.success('Medical report uploaded successfully!');

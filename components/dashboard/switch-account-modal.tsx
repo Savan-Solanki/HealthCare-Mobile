@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { proxyImageUrl } from '@/lib/proxy-image';
 import {
   ArrowRight,
   Check,
@@ -428,7 +429,7 @@ export default function SwitchAccountModal({ open, onClose }: SwitchAccountModal
                     {/* Avatar */}
                     {account.avatar ? (
                       <img
-                        src={account.avatar}
+                        src={proxyImageUrl(account.avatar) ?? ''}
                         alt={account.name}
                         className="h-11 w-11 rounded-full object-cover shrink-0"
                       />
@@ -591,7 +592,7 @@ export default function SwitchAccountModal({ open, onClose }: SwitchAccountModal
                       <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-100 p-3">
                         {setupAvatar ? (
                           <img
-                            src={setupAvatar}
+                            src={proxyImageUrl(setupAvatar) ?? setupAvatar}
                             alt={setupName}
                             className="h-10 w-10 rounded-full object-cover"
                           />

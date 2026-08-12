@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { proxyImageUrl } from '@/lib/proxy-image';
 
 type PatientAvatarProps = {
   avatar: string | null;
@@ -14,13 +15,14 @@ export default function PatientAvatar({
   name,
 }: PatientAvatarProps) {
   const [imgFailed, setImgFailed] = useState(false);
+  const proxiedAvatar = proxyImageUrl(avatar);
 
-  if (avatar && avatar.trim() !== '' && !imgFailed) {
+  if (proxiedAvatar && !imgFailed) {
     return (
       <div className={`relative overflow-hidden rounded-full ${className ?? ''}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={avatar}
+          src={proxiedAvatar}
           alt={name}
           className="h-full w-full object-cover"
           onError={() => setImgFailed(true)}

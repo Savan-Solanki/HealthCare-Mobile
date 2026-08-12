@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { proxyImageUrl } from '@/lib/proxy-image';
 import {
   Check,
   Loader2,
@@ -181,7 +182,7 @@ export default function ManageAccountsModal({ open, onClose }: ManageAccountsMod
                     {/* Avatar */}
                     {account.avatar ? (
                       <img
-                        src={account.avatar}
+                        src={proxyImageUrl(account.avatar) ?? ''}
                         alt={account.name}
                         className="h-11 w-11 rounded-full object-cover"
                       />

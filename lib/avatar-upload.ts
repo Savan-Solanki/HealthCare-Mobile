@@ -26,6 +26,26 @@ export const uploadPatientAvatar = async (croppedDataUrl: string): Promise<strin
   const blob = await dataUrlToBlob(croppedDataUrl);
   const contentType = blob.type || 'image/jpeg';
 
+  const isHttps = typeof window !== 'undefined' && window.location?.protocol === 'https:';
+
+  if (isHttps) {
+    // On HTTPS (Vercel), upload directly through backend to avoid S3 CORS issues
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.jpg');
+
+    const response = await api.put('/patient/profile', formData, {
+      timeout: 60000,
+    });
+
+    const avatarUrl = response.data?.data?.avatar || response.data?.data?.avatarUrl;
+    if (!avatarUrl) {
+      throw new Error('Profile photo upload could not be finalized.');
+    }
+
+    return avatarUrl;
+  }
+
+  // Local/HTTP: use presigned S3 URL flow
   const sessionResponse = await api.post('/patient/avatar/upload-session', {
     contentType,
     fileSize: blob.size,
@@ -39,50 +59,26 @@ export const uploadPatientAvatar = async (croppedDataUrl: string): Promise<strin
     throw new Error('Unable to start profile photo upload.');
   }
 
-  // Try direct S3 upload first; fallback to server-side if CORS blocks it
-  let s3Success = false;
-  try {
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': sessionContentType,
-      },
-      body: blob,
-    });
-    if (uploadResponse.ok) {
-      s3Success = true;
-    }
-  } catch (s3Err) {
-    console.warn('[Avatar] Direct S3 upload blocked by CORS. Using server fallback...', s3Err);
-  }
-
-  if (s3Success) {
-    const completeResponse = await api.post('/patient/avatar/upload-complete', {
-      uploadToken,
-    });
-
-    const avatarUrl = completeResponse.data?.data?.avatar;
-    if (!avatarUrl) {
-      throw new Error('Profile photo upload could not be finalized.');
-    }
-
-    return avatarUrl;
-  }
-
-  // Fallback: upload avatar directly through backend API as multipart form data
-  const formData = new FormData();
-  formData.append('avatar', blob, 'avatar.jpg');
-
-  const fallbackResponse = await api.put('/patient/profile', formData, {
-    timeout: 60000,
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': sessionContentType },
+    body: blob,
   });
 
-  const fallbackAvatar = fallbackResponse.data?.data?.avatar || fallbackResponse.data?.data?.avatarUrl;
-  if (!fallbackAvatar) {
+  if (!uploadResponse.ok) {
+    throw new Error('Profile photo upload failed. Please try again.');
+  }
+
+  const completeResponse = await api.post('/patient/avatar/upload-complete', {
+    uploadToken,
+  });
+
+  const avatarUrl = completeResponse.data?.data?.avatar;
+  if (!avatarUrl) {
     throw new Error('Profile photo upload could not be finalized.');
   }
 
-  return fallbackAvatar;
+  return avatarUrl;
 };
 
 export const cropAndUploadPatientAvatar = async (
